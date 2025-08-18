@@ -1,4 +1,4 @@
-@import 'tailwindcss';
+@import "tailwindcss";
 
 @source '../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
 @source '../../storage/framework/views/*.php';
@@ -6,6 +6,92 @@
 @source '../**/*.js';
 
 @theme {
-    --font-sans: 'Instrument Sans', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji',
-        'Segoe UI Symbol', 'Noto Color Emoji';
+    --font-sans: "Figtree", ui-sans-serif, system-ui, sans-serif,
+        "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol",
+        "Noto Color Emoji";
+
+    /* Custom color palette */
+    --color-background: #1f1f1f;
+    --color-foreground: #cdfde6;
+    --color-accent: #01ff87;
+    --color-accent-hover: #00e676;
+    --color-card: #2a2a2a;
+    --color-card-border: #3a3a3a;
+    --color-input-bg: #2a2a2a;
+    --color-input-border: #3a3a3a;
+    --color-input-focus: #01ff87;
+    --color-error: #ff6b6b;
+    --color-success: #51cf66;
+}
+
+/* Custom styles for better compatibility */
+@layer base {
+    html {
+        font-family: var(--font-sans);
+    }
+
+    body {
+        font-family: var(--font-sans);
+        line-height: 1.5;
+        background-color: var(--color-background);
+        color: var(--color-foreground);
+    }
+}
+
+@layer components {
+    /* Ensure form elements work properly */
+    input,
+    button,
+    textarea,
+    select {
+        font-family: inherit;
+    }
+
+    /* Custom button styles */
+    .btn-primary {
+        background: linear-gradient(
+            135deg,
+            var(--color-accent),
+            var(--color-accent-hover)
+        );
+        color: var(--color-background);
+        border: none;
+        border-radius: 0.75rem;
+        padding: 0.75rem 1.5rem;
+        font-weight: 500;
+        transition: all 0.2s ease;
+    }
+
+    .btn-primary:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 4px 12px rgba(1, 255, 135, 0.3);
+    }
+
+    /* Custom card styles */
+    .card {
+        background-color: var(--color-card);
+        border: 1px solid var(--color-card-border);
+        border-radius: 1rem;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+
+    /* Custom input styles */
+    .input-field {
+        background-color: var(--color-input-bg);
+        border: 1px solid var(--color-input-border);
+        color: var(--color-foreground);
+        border-radius: 0.75rem;
+        padding: 0.75rem 1rem;
+        transition: all 0.2s ease;
+    }
+
+    .input-field:focus {
+        border-color: var(--color-input-focus);
+        box-shadow: 0 0 0 3px rgba(1, 255, 135, 0.1);
+        outline: none;
+    }
+
+    .input-field::placeholder {
+        color: #888;
+    }
 }
