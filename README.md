@@ -4,6 +4,14 @@
 
 Una plataforma web basada en Laravel para jugadores de fútbol amateur. Veltro permite a los jugadores encontrar otros para jugar, crear sus propios equipos, enfrentarse a otros equipos, gestionar sus equipos, crear sus perfiles y mucho más.
 
+## Integrantes
+
+- Paolo Fumero
+- Nahuel Galego
+- Martin Landaco
+- Mateo López
+- Fermín Martínez
+
 ## Prerrequisitos
 
 Antes de comenzar, asegúrate de tener instalado en tu sistema:
