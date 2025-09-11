@@ -4,10 +4,11 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\TeamController;
 
 // Public routes
 Route::get('/', function () {
-    return view('welcome');
+    return view('landing');
 })->name('home');
 
 // Authentication routes
@@ -29,4 +30,11 @@ Route::middleware('auth')->group(function () {
     Route::put('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::put('/profile/password', [ProfileController::class, 'updatePassword'])->name('profile.password');
     Route::delete('/profile', [ProfileController::class, 'deleteAccount'])->name('profile.delete');
+
+    // Team routes
+    Route::resource('teams', TeamController::class);
+    Route::post('/teams/{team}/join', [TeamController::class, 'join'])->name('teams.join');
+    Route::post('/teams/{team}/leave', [TeamController::class, 'leave'])->name('teams.leave');
+    Route::post('/teams/{team}/promote/{user}', [TeamController::class, 'promote'])->name('teams.promote');
+    Route::delete('/teams/{team}/members/{user}', [TeamController::class, 'removeMember'])->name('teams.remove-member');
 });

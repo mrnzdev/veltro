@@ -28,11 +28,14 @@
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
                             </svg>
                         </div>
-                        <h1 class="text-xl font-bold text-[#CDFDE6]">{{ config('app.name', 'Laravel') }}</h1>
+                        <h1 class="text-xl font-bold text-[#CDFDE6]">{{ config('app.name', 'Veltro') }}</h1>
                     </div>
                 </div>
 
                 <div class="flex items-center space-x-4">
+                    <a href="{{ route('teams.index') }}" class="text-[#CDFDE6] hover:text-[#01FF87] transition-colors duration-200">
+                        Teams
+                    </a>
                     <a href="{{ route('profile.show') }}" class="flex items-center space-x-3 hover:opacity-80 transition-opacity duration-200">
                         <div class="h-8 w-8 bg-gradient-to-r from-[#01FF87] to-[#00e676] rounded-full flex items-center justify-center hover:scale-110 transition-transform duration-200">
                             <span class="text-sm font-medium text-[#1f1f1f]">{{ substr(Auth::user()->name, 0, 1) }}</span>
