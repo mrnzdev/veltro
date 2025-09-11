@@ -52,7 +52,10 @@ class Team extends Model
     {
         return $this->belongsToMany(User::class)
             ->withPivot(['role', 'joined_at'])
-            ->withTimestamps();
+            ->withTimestamps()
+            ->withPivotCasts([
+                'joined_at' => 'datetime',
+            ]);
     }
 
     /**

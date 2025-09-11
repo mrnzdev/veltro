@@ -236,7 +236,7 @@
                         </div>
                     </div>
                     <div class="mt-2 text-xs text-gray-400">
-                        Joined {{ $member->pivot->joined_at->diffForHumans() }}
+                        Joined {{ $member->pivot->joined_at ? $member->pivot->joined_at->diffForHumans() : 'Recently' }}
                     </div>
                 </div>
                 @endforeach

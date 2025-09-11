@@ -165,7 +165,7 @@
                         @endif
                         <div class="flex items-center justify-between text-sm text-gray-400 mb-4">
                             <span>Owner: {{ $team->owner->name }}</span>
-                            <span>Joined {{ $team->pivot->joined_at->diffForHumans() }}</span>
+                            <span>Joined {{ $team->pivot->joined_at ? $team->pivot->joined_at->diffForHumans() : 'Recently' }}</span>
                         </div>
                         <div class="flex space-x-2">
                             <a href="{{ route('teams.show', $team) }}" 
