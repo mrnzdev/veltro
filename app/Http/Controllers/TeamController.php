@@ -66,7 +66,7 @@ class TeamController extends Controller
         });
 
         return redirect()->route('teams.index')
-            ->with('success', 'Team created successfully!');
+            ->with('success', '¡Equipo creado exitosamente!');
     }
 
     /**
@@ -111,7 +111,7 @@ class TeamController extends Controller
         $team->update($validated);
 
         return redirect()->route('teams.show', $team)
-            ->with('success', 'Team updated successfully!');
+            ->with('success', '¡Equipo actualizado exitosamente!');
     }
 
     /**
@@ -124,7 +124,7 @@ class TeamController extends Controller
         $team->delete();
 
         return redirect()->route('teams.index')
-            ->with('success', 'Team deleted successfully!');
+            ->with('success', '¡Equipo eliminado exitosamente!');
     }
 
     /**
@@ -136,12 +136,12 @@ class TeamController extends Controller
 
         if ($team->hasMember($user)) {
             return redirect()->back()
-                ->with('error', 'You are already a member of this team.');
+                ->with('error', 'Ya eres miembro de este equipo.');
         }
 
         if (!$team->hasSpaceForMembers()) {
             return redirect()->back()
-                ->with('error', 'This team is full.');
+                ->with('error', 'Este equipo está completo.');
         }
 
         $team->members()->attach($user->id, [
@@ -150,7 +150,7 @@ class TeamController extends Controller
         ]);
 
         return redirect()->back()
-            ->with('success', 'You have successfully joined the team!');
+            ->with('success', '¡Te has unido exitosamente al equipo!');
     }
 
     /**
@@ -162,18 +162,18 @@ class TeamController extends Controller
 
         if (!$team->hasMember($user)) {
             return redirect()->back()
-                ->with('error', 'You are not a member of this team.');
+                ->with('error', 'No eres miembro de este equipo.');
         }
 
         if ($team->isOwnedBy($user)) {
             return redirect()->back()
-                ->with('error', 'Team owners cannot leave their own team. Transfer ownership or delete the team instead.');
+                ->with('error', 'Los propietarios de equipos no pueden salir de su propio equipo. Transfiere la propiedad o elimina el equipo en su lugar.');
         }
 
         $team->members()->detach($user->id);
 
         return redirect()->back()
-            ->with('success', 'You have successfully left the team.');
+            ->with('success', 'Has salido exitosamente del equipo.');
     }
 
     /**
@@ -185,7 +185,7 @@ class TeamController extends Controller
 
         if (!$team->hasMember($user)) {
             return redirect()->back()
-                ->with('error', 'User is not a member of this team.');
+                ->with('error', 'El usuario no es miembro de este equipo.');
         }
 
         $team->members()->updateExistingPivot($user->id, [
@@ -193,7 +193,7 @@ class TeamController extends Controller
         ]);
 
         return redirect()->back()
-            ->with('success', 'Member promoted to captain successfully!');
+            ->with('success', '¡Miembro promovido a capitán exitosamente!');
     }
 
     /**
@@ -205,17 +205,17 @@ class TeamController extends Controller
 
         if (!$team->hasMember($user)) {
             return redirect()->back()
-                ->with('error', 'User is not a member of this team.');
+                ->with('error', 'El usuario no es miembro de este equipo.');
         }
 
         if ($team->isOwnedBy($user)) {
             return redirect()->back()
-                ->with('error', 'Cannot remove the team owner.');
+                ->with('error', 'No se puede remover al propietario del equipo.');
         }
 
         $team->members()->detach($user->id);
 
         return redirect()->back()
-            ->with('success', 'Member removed from team successfully!');
+            ->with('success', '¡Miembro removido del equipo exitosamente!');
     }
 }

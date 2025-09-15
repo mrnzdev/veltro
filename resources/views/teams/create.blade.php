@@ -6,7 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
-    <title>{{ config('app.name', 'Laravel') }} - Create Team</title>
+    <title>{{ config('app.name', 'Laravel') }} - Crear Equipo</title>
 
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.bunny.net">
@@ -34,10 +34,10 @@
 
                 <div class="flex items-center space-x-4">
                     <a href="{{ route('teams.index') }}" class="text-[#CDFDE6] hover:text-[#01FF87] transition-colors duration-200">
-                        ← Back to Teams
+                        ← Volver a Equipos
                     </a>
                     <a href="{{ route('dashboard') }}" class="text-[#CDFDE6] hover:text-[#01FF87] transition-colors duration-200">
-                        Dashboard
+                        Panel
                     </a>
                 </div>
             </div>
@@ -48,8 +48,8 @@
     <main class="max-w-2xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
         <!-- Header -->
         <div class="mb-8">
-            <h2 class="text-3xl font-bold text-[#CDFDE6] mb-2">Create New Team ⚽</h2>
-            <p class="text-gray-400">Start your own team and invite players to join.</p>
+            <h2 class="text-3xl font-bold text-[#CDFDE6] mb-2">Crear Nuevo Equipo ⚽</h2>
+            <p class="text-gray-400">Crea tu propio equipo e invita a jugadores a unirse.</p>
         </div>
 
         <!-- Form -->
@@ -60,14 +60,14 @@
                 <!-- Team Name -->
                 <div class="mb-6">
                     <label for="name" class="block text-sm font-medium text-[#CDFDE6] mb-2">
-                        Team Name *
+                        Nombre del Equipo *
                     </label>
                     <input type="text" 
                            id="name" 
                            name="name" 
                            value="{{ old('name') }}"
                            class="w-full px-4 py-3 bg-[#3a3a3a] border border-[#4a4a4a] rounded-lg text-[#CDFDE6] placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#01FF87] focus:border-transparent transition-all duration-200"
-                           placeholder="Enter your team name"
+                           placeholder="Ingresa el nombre de tu equipo"
                            required>
                     @error('name')
                     <p class="mt-2 text-sm text-red-400">{{ $message }}</p>
@@ -77,13 +77,13 @@
                 <!-- Description -->
                 <div class="mb-6">
                     <label for="description" class="block text-sm font-medium text-[#CDFDE6] mb-2">
-                        Description
+                        Descripción
                     </label>
                     <textarea id="description" 
                               name="description" 
                               rows="4"
                               class="w-full px-4 py-3 bg-[#3a3a3a] border border-[#4a4a4a] rounded-lg text-[#CDFDE6] placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#01FF87] focus:border-transparent transition-all duration-200"
-                              placeholder="Tell us about your team...">{{ old('description') }}</textarea>
+                              placeholder="Cuéntanos sobre tu equipo...">{{ old('description') }}</textarea>
                     @error('description')
                     <p class="mt-2 text-sm text-red-400">{{ $message }}</p>
                     @enderror
@@ -92,16 +92,16 @@
                 <!-- Max Members -->
                 <div class="mb-8">
                     <label for="max_members" class="block text-sm font-medium text-[#CDFDE6] mb-2">
-                        Maximum Members *
+                        Máximo de Miembros *
                     </label>
                     <select id="max_members" 
                             name="max_members"
                             class="w-full px-4 py-3 bg-[#3a3a3a] border border-[#4a4a4a] rounded-lg text-[#CDFDE6] focus:outline-none focus:ring-2 focus:ring-[#01FF87] focus:border-transparent transition-all duration-200"
                             required>
-                        <option value="">Select maximum members</option>
+                        <option value="">Selecciona el máximo de miembros</option>
                         @for($i = 2; $i <= 50; $i++)
                         <option value="{{ $i }}" {{ old('max_members', 11) == $i ? 'selected' : '' }}>
-                            {{ $i }} {{ $i === 11 ? '(Standard Football Team)' : '' }}
+                            {{ $i }} {{ $i === 11 ? '(Equipo de Fútbol Estándar)' : '' }}
                         </option>
                         @endfor
                     </select>
@@ -114,11 +114,11 @@
                 <div class="flex space-x-4">
                     <button type="submit" 
                             class="flex-1 bg-gradient-to-r from-[#01FF87] to-[#00e676] text-[#1f1f1f] font-medium py-3 px-6 rounded-lg hover:opacity-90 transition-opacity duration-200">
-                        Create Team
+                        Crear Equipo
                     </button>
                     <a href="{{ route('teams.index') }}" 
                        class="flex-1 text-center bg-[#3a3a3a] text-[#CDFDE6] font-medium py-3 px-6 rounded-lg hover:bg-[#4a4a4a] transition-colors duration-200">
-                        Cancel
+                        Cancelar
                     </a>
                 </div>
             </form>
@@ -133,13 +133,13 @@
                     </svg>
                 </div>
                 <div class="ml-3">
-                    <h3 class="text-sm font-medium text-[#CDFDE6]">Team Creation Tips</h3>
+                    <h3 class="text-sm font-medium text-[#CDFDE6]">Consejos para Crear Equipos</h3>
                     <div class="mt-2 text-sm text-gray-400">
                         <ul class="list-disc list-inside space-y-1">
-                            <li>You will automatically become the team owner</li>
-                            <li>Standard football teams have 11 players</li>
-                            <li>You can invite players to join your team later</li>
-                            <li>Team names must be unique across the platform</li>
+                            <li>Te convertirás automáticamente en el propietario del equipo</li>
+                            <li>Los equipos de fútbol estándar tienen 11 jugadores</li>
+                            <li>Puedes invitar jugadores a unirse a tu equipo más tarde</li>
+                            <li>Los nombres de los equipos deben ser únicos en la plataforma</li>
                         </ul>
                     </div>
                 </div>
