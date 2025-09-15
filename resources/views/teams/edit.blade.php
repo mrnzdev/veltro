@@ -1,51 +1,9 @@
-<!DOCTYPE html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
+@extends('layouts.app')
 
-<head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta name="csrf-token" content="{{ csrf_token() }}">
+@section('title', config('app.name', 'Laravel') . ' - Editar ' . $team->name)
 
-    <title>{{ config('app.name', 'Laravel') }} - Editar {{ $team->name }}</title>
-
-    <!-- Fonts -->
-    <link rel="preconnect" href="https://fonts.bunny.net">
-    <link href="https://fonts.bunny.net/css?family=figtree:400,500,600&display=swap" rel="stylesheet" />
-
-    <!-- Scripts -->
-    @vite(['resources/css/app.css', 'resources/js/app.js'])
-</head>
-
-<body class="font-sans antialiased min-h-screen" style="background-color: #1f1f1f; color: #CDFDE6;">
-    <!-- Navigation -->
-    <nav class="bg-[#2a2a2a] shadow-sm border-b border-[#3a3a3a]">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="flex justify-between h-16">
-                <div class="flex items-center">
-                    <div class="flex-shrink-0 flex items-center">
-                        <div class="h-8 w-8 bg-gradient-to-r from-[#01FF87] to-[#00e676] rounded-lg flex items-center justify-center mr-3">
-                            <svg class="h-5 w-5 text-[#1f1f1f]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
-                            </svg>
-                        </div>
-                        <h1 class="text-xl font-bold text-[#CDFDE6]">{{ config('app.name', 'Veltro') }}</h1>
-                    </div>
-                </div>
-
-                <div class="flex items-center space-x-4">
-                    <a href="{{ route('teams.show', $team) }}" class="text-[#CDFDE6] hover:text-[#01FF87] transition-colors duration-200">
-                        ← Volver al Equipo
-                    </a>
-                    <a href="{{ route('teams.index') }}" class="text-[#CDFDE6] hover:text-[#01FF87] transition-colors duration-200">
-                        Todos los Equipos
-                    </a>
-                </div>
-            </div>
-        </div>
-    </nav>
-
-    <!-- Page Content -->
-    <main class="max-w-2xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
+@section('content')
+<div class="max-w-2xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
         <!-- Header -->
         <div class="mb-8">
             <h2 class="text-3xl font-bold text-[#CDFDE6] mb-2">Editar Equipo ⚽</h2>
@@ -181,7 +139,5 @@
             </form>
         </div>
         @endif
-    </main>
-</body>
-
-</html>
+</div>
+@endsection
