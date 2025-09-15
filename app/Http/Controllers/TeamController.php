@@ -22,13 +22,63 @@ class TeamController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index(): View
+    public function index(Request $request): View
     {
         $user = Auth::user();
         
         $ownedTeams = $user->ownedTeams()->active()->with('members')->get();
         $memberTeams = $user->teams()->active()->with('owner')->get();
-        $allTeams = Team::active()->with(['owner', 'members'])->paginate(12);
+        
+        // Build query for all teams with search and filters
+        $query = Team::active()->with(['owner', 'members']);
+        
+        // Search functionality
+        if ($request->filled('search')) {
+            $searchTerm = $request->get('search');
+            $query->where('name', 'like', "%{$searchTerm}%")
+                  ->orWhere('description', 'like', "%{$searchTerm}%");
+        }
+        
+        // Filter by team availability
+        if ($request->filled('availability')) {
+            $availability = $request->get('availability');
+            if ($availability === 'open') {
+                $query->whereRaw('(SELECT COUNT(*) FROM team_user WHERE team_user.team_id = teams.id) < max_members');
+            } elseif ($availability === 'full') {
+                $query->whereRaw('(SELECT COUNT(*) FROM team_user WHERE team_user.team_id = teams.id) >= max_members');
+            }
+        }
+        
+        // Filter by team size
+        if ($request->filled('size')) {
+            $size = $request->get('size');
+            if ($size === 'small') {
+                $query->where('max_members', '<=', 7);
+            } elseif ($size === 'medium') {
+                $query->whereBetween('max_members', [8, 15]);
+            } elseif ($size === 'large') {
+                $query->where('max_members', '>', 15);
+            }
+        }
+        
+        // Sort options
+        $sortBy = $request->get('sort', 'recent');
+        switch ($sortBy) {
+            case 'name':
+                $query->orderBy('name', 'asc');
+                break;
+            case 'members':
+                $query->orderByRaw('(SELECT COUNT(*) FROM team_user WHERE team_user.team_id = teams.id) DESC');
+                break;
+            case 'oldest':
+                $query->orderBy('created_at', 'asc');
+                break;
+            default: // 'recent'
+                $query->orderBy('created_at', 'desc');
+                break;
+        }
+        
+        $allTeams = $query->paginate(12)->withQueryString();
 
         return view('teams.index', compact('ownedTeams', 'memberTeams', 'allTeams'));
     }
