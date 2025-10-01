@@ -6,7 +6,7 @@
 <div class="max-w-2xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
         <!-- Header -->
         <div class="mb-8">
-            <h2 class="text-3xl font-bold text-[#CDFDE6] mb-2">Crear Nuevo Equipo ⚽</h2>
+            <h2 class="text-3xl font-bold text-[#CDFDE6] mb-2">Crear Nuevo Equipo</h2>
             <p class="text-gray-400">Crea tu propio equipo e invita a jugadores a unirse.</p>
         </div>
 
@@ -95,9 +95,7 @@
                     <div class="mt-2 text-sm text-gray-400">
                         <ul class="list-disc list-inside space-y-1">
                             <li>Te convertirás automáticamente en el propietario del equipo</li>
-                            <li>Los equipos de fútbol estándar tienen 11 jugadores</li>
                             <li>Puedes invitar jugadores a unirse a tu equipo más tarde</li>
-                            <li>Los nombres de los equipos deben ser únicos en la plataforma</li>
                         </ul>
                     </div>
                 </div>

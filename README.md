@@ -6,11 +6,11 @@ Una plataforma web basada en Laravel para jugadores de fútbol amateur. Veltro p
 
 ## Integrantes
 
-- Paolo Fumero
-- Nahuel Galego
-- Martin Landaco
-- Mateo López
-- Fermín Martínez
+-   Paolo Fumero
+-   Nahuel Galego
+-   Martin Landaco
+-   Mateo López
+-   Fermín Martínez
 
 ## Prerrequisitos
 
