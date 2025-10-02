@@ -16,18 +16,16 @@ class AuthService
     {
         $hashedPassword = Hash::make($password);
 
-        $result = DB::select('CALL sp_register_user(?, ?, ?, @user_id, @success, @message)', [
+        $result = DB::select('CALL sp_register_user(?, ?, ?)', [
             $name,
             $email,
             $hashedPassword
         ]);
 
-        $output = DB::select('SELECT @user_id as user_id, @success as success, @message as message');
-
         return [
-            'user_id' => (int) $output[0]->user_id,
-            'success' => (bool) $output[0]->success,
-            'message' => $output[0]->message
+            'user_id' => (int) $result[0]->user_id,
+            'success' => (bool) $result[0]->success,
+            'message' => $result[0]->message
         ];
     }
 
@@ -36,11 +34,9 @@ class AuthService
      */
     public function checkEmailUnique(string $email): bool
     {
-        $result = DB::select('CALL sp_check_email_unique(?, @is_unique)', [$email]);
+        $result = DB::select('CALL sp_check_email_unique(?)', [$email]);
 
-        $output = DB::select('SELECT @is_unique as is_unique');
-
-        return (bool) $output[0]->is_unique;
+        return (bool) $result[0]->is_unique;
     }
 
     /**
@@ -48,16 +44,14 @@ class AuthService
      */
     public function getUserByEmail(string $email): ?array
     {
-        $result = DB::select('CALL sp_get_user_by_email(?, @user_id, @user_name, @user_email, @user_password, @user_exists)', [$email]);
+        $result = DB::select('CALL sp_get_user_by_email(?)', [$email]);
 
-        $output = DB::select('SELECT @user_id as user_id, @user_name as user_name, @user_email as user_email, @user_password as user_password, @user_exists as user_exists');
-
-        if ($output[0]->user_exists) {
+        if (!empty($result) && isset($result[0]->user_exists) && $result[0]->user_exists) {
             return [
-                'id' => (int) $output[0]->user_id,
-                'name' => $output[0]->user_name,
-                'email' => $output[0]->user_email,
-                'password' => $output[0]->user_password
+                'id' => (int) $result[0]->user_id,
+                'name' => $result[0]->user_name,
+                'email' => $result[0]->user_email,
+                'password' => $result[0]->user_password
             ];
         }
 
