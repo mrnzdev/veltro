@@ -1,13 +1,9 @@
 <?php
 
-declare(strict_types=1);
-
 namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Relations\BelongsToMany;
-use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 
@@ -48,56 +44,5 @@ class User extends Authenticatable
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
         ];
-    }
-
-    /**
-     * Get the teams owned by the user.
-     */
-    public function ownedTeams(): HasMany
-    {
-        return $this->hasMany(Team::class, 'owner_id');
-    }
-
-    /**
-     * Get the teams the user is a member of.
-     */
-    public function teams(): BelongsToMany
-    {
-        return $this->belongsToMany(Team::class)
-            ->using(TeamUser::class)
-            ->withPivot(['role', 'joined_at'])
-            ->withTimestamps();
-    }
-
-    /**
-     * Get the teams where the user is a captain.
-     */
-    public function captainTeams(): BelongsToMany
-    {
-        return $this->teams()->wherePivot('role', 'captain');
-    }
-
-    /**
-     * Check if the user owns any teams.
-     */
-    public function ownsTeams(): bool
-    {
-        return $this->ownedTeams()->exists();
-    }
-
-    /**
-     * Check if the user is a member of any teams.
-     */
-    public function isMemberOfTeams(): bool
-    {
-        return $this->teams()->exists();
-    }
-
-    /**
-     * Check if the user is a captain of any teams.
-     */
-    public function isCaptainOfTeams(): bool
-    {
-        return $this->captainTeams()->exists();
     }
 }
