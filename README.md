@@ -6,11 +6,11 @@ Una plataforma web basada en Laravel para jugadores de fútbol amateur. Veltro p
 
 ## Integrantes
 
-- Paolo Fumero
-- Nahuel Galego
-- Martin Landaco
-- Mateo López
-- Fermín Martínez
+-   Paolo Fumero
+-   Nahuel Galego
+-   Martin Landaco
+-   Mateo López
+-   Fermín Martínez
 
 ## Prerrequisitos
 
@@ -18,7 +18,7 @@ Antes de comenzar, asegúrate de tener instalado en tu sistema:
 
 -   **PHP 8.4+** - Lenguaje de programación
 -   **Composer** - Gestor de dependencias de PHP
--   **Node.js 18+** y **pnpm** - Para compilación de assets frontend
+-   **Node.js 18+** y **bun** - Para compilación de assets frontend
 -   **MySQL 8.0+** - Servidor de base de datos
 -   **Git** - Control de versiones
 
@@ -40,7 +40,7 @@ composer install
 ### 3. Instalar Dependencias de Node.js
 
 ```bash
-pnpm install
+bun install
 ```
 
 ### 4. Configuración del Entorno
@@ -87,10 +87,10 @@ php artisan db:seed
 
 ```bash
 # Compilación de desarrollo (con recarga automática)
-pnpm run dev
+bun run dev
 
 # O para compilación de producción
-pnpm run build
+bun run build
 ```
 
 ### 8. Iniciar el Servidor de Desarrollo
@@ -160,10 +160,10 @@ veltro/
 php artisan serve
 
 # Observar cambios de archivos y recompilar assets
-pnpm run dev
+bun run dev
 
 # Compilar assets para producción
-pnpm run build
+bun run build
 ```
 
 ### Base de Datos
@@ -187,22 +187,22 @@ php artisan make:migration create_table_name
 
 ## Gestión de Paquetes
 
-Este proyecto utiliza **pnpm** como gestor de paquetes de Node.js para mejor rendimiento y eficiencia de espacio en disco.
+Este proyecto utiliza **bun** como gestor de paquetes de Node.js para mejor rendimiento y eficiencia de espacio en disco.
 
 ### Instalación de Dependencias
 
 ```bash
 # Instalar todas las dependencias
-pnpm install
+bun install
 
 # Agregar una nueva dependencia
-pnpm add nombre-paquete
+bun add nombre-paquete
 
 # Agregar una dependencia de desarrollo
-pnpm add -D nombre-paquete
+bun add -D nombre-paquete
 
 # Remover una dependencia
-pnpm remove nombre-paquete
+bun remove nombre-paquete
 ```
 
 ### Configuración de Conexión

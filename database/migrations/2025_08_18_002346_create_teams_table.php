@@ -13,7 +13,15 @@ return new class extends Migration
     {
         Schema::create('teams', function (Blueprint $table) {
             $table->id();
+            $table->string('name');
+            $table->text('description')->nullable();
+            $table->string('logo')->nullable();
+            $table->foreignId('owner_id')->constrained('users')->onDelete('cascade');
+            $table->integer('max_members')->default(11); // Default for football team
+            $table->boolean('is_active')->default(true);
             $table->timestamps();
+            
+            $table->index(['owner_id', 'is_active']);
         });
     }
 
