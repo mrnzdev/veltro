@@ -37,4 +37,9 @@ Route::middleware('auth')->group(function () {
     Route::post('/teams/{team}/leave', [TeamController::class, 'leave'])->name('teams.leave');
     Route::post('/teams/{team}/promote/{user}', [TeamController::class, 'promote'])->name('teams.promote');
     Route::delete('/teams/{team}/members/{user}', [TeamController::class, 'removeMember'])->name('teams.remove-member');
+
+    // Team join request routes
+    Route::post('/teams/{team}/join-requests/{joinRequest}/approve', [TeamController::class, 'approveJoinRequest'])->name('teams.join-requests.approve');
+    Route::post('/teams/{team}/join-requests/{joinRequest}/reject', [TeamController::class, 'rejectJoinRequest'])->name('teams.join-requests.reject');
+    Route::delete('/teams/{team}/join-requests/{joinRequest}/cancel', [TeamController::class, 'cancelJoinRequest'])->name('teams.join-requests.cancel');
 });
