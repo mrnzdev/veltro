@@ -14,6 +14,32 @@ class Team extends Model
     use HasFactory;
 
     /**
+     * Football type configurations.
+     */
+    public const FOOTBALL_TYPES = [
+        'football_5' => [
+            'name' => 'Fútbol 5',
+            'max_members' => 5,
+            'icon' => '⚽',
+        ],
+        'football_7' => [
+            'name' => 'Fútbol 7',
+            'max_members' => 7,
+            'icon' => '⚽',
+        ],
+        'football_11' => [
+            'name' => 'Fútbol 11',
+            'max_members' => 11,
+            'icon' => '⚽',
+        ],
+        'futsal' => [
+            'name' => 'Futsal',
+            'max_members' => 5,
+            'icon' => '🏐',
+        ],
+    ];
+
+    /**
      * The attributes that are mass assignable.
      *
      * @var array<int, string>
@@ -23,6 +49,7 @@ class Team extends Model
         'description',
         'logo',
         'owner_id',
+        'football_type',
         'max_members',
         'is_active',
     ];
@@ -62,6 +89,22 @@ class Team extends Model
     public function captains(): BelongsToMany
     {
         return $this->members()->wherePivot('role', 'captain');
+    }
+
+    /**
+     * Get the join requests for this team.
+     */
+    public function joinRequests()
+    {
+        return $this->hasMany(TeamJoinRequest::class);
+    }
+
+    /**
+     * Get the pending join requests for this team.
+     */
+    public function pendingJoinRequests()
+    {
+        return $this->hasMany(TeamJoinRequest::class)->where('status', 'pending');
     }
 
     /**
@@ -113,5 +156,49 @@ class Team extends Model
     public function scopeActive($query)
     {
         return $query->where('is_active', true);
+    }
+
+    /**
+     * Get the football type name.
+     */
+    public function getFootballTypeName(): string
+    {
+        return self::FOOTBALL_TYPES[$this->football_type]['name'] ?? 'Desconocido';
+    }
+
+    /**
+     * Get the football type icon.
+     */
+    public function getFootballTypeIcon(): string
+    {
+        return self::FOOTBALL_TYPES[$this->football_type]['icon'] ?? '⚽';
+    }
+
+    /**
+     * Get the max members for a football type.
+     */
+    public static function getMaxMembersForType(string $footballType): int
+    {
+        return self::FOOTBALL_TYPES[$footballType]['max_members'] ?? 11;
+    }
+
+    /**
+     * Boot method to set max_members based on football_type.
+     */
+    protected static function boot(): void
+    {
+        parent::boot();
+
+        static::creating(function (Team $team) {
+            if ($team->football_type && !$team->max_members) {
+                $team->max_members = self::getMaxMembersForType($team->football_type);
+            }
+        });
+
+        static::updating(function (Team $team) {
+            if ($team->isDirty('football_type')) {
+                $team->max_members = self::getMaxMembersForType($team->football_type);
+            }
+        });
     }
 }
