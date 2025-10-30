@@ -108,6 +108,46 @@ class Team extends Model
     }
 
     /**
+     * Get the match requests created by this team.
+     */
+    public function matchRequests()
+    {
+        return $this->hasMany(MatchRequest::class);
+    }
+
+    /**
+     * Get the open match requests created by this team.
+     */
+    public function openMatchRequests()
+    {
+        return $this->hasMany(MatchRequest::class)->where('status', 'open');
+    }
+
+    /**
+     * Get the match applications made by this team.
+     */
+    public function matchApplications()
+    {
+        return $this->hasMany(MatchApplication::class, 'applicant_team_id');
+    }
+
+    /**
+     * Get the matches where this team is the host.
+     */
+    public function matches()
+    {
+        return $this->hasMany(TeamMatch::class, 'team_id');
+    }
+
+    /**
+     * Get the matches where this team is the opponent.
+     */
+    public function opponentMatches()
+    {
+        return $this->hasMany(TeamMatch::class, 'opponent_team_id');
+    }
+
+    /**
      * Check if a user is a member of the team.
      */
     public function hasMember(User $user): bool

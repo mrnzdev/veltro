@@ -3,6 +3,8 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\MatchRequestController;
+use App\Http\Controllers\MatchResultController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\TeamController;
 
@@ -42,4 +44,21 @@ Route::middleware('auth')->group(function () {
     Route::post('/teams/{team}/join-requests/{joinRequest}/approve', [TeamController::class, 'approveJoinRequest'])->name('teams.join-requests.approve');
     Route::post('/teams/{team}/join-requests/{joinRequest}/reject', [TeamController::class, 'rejectJoinRequest'])->name('teams.join-requests.reject');
     Route::delete('/teams/{team}/join-requests/{joinRequest}/cancel', [TeamController::class, 'cancelJoinRequest'])->name('teams.join-requests.cancel');
+
+    // Match request routes
+    Route::get('/match-requests', [MatchRequestController::class, 'index'])->name('match-requests.index');
+    Route::get('/match-requests/create', [MatchRequestController::class, 'create'])->name('match-requests.create');
+    Route::post('/match-requests', [MatchRequestController::class, 'store'])->name('match-requests.store');
+    Route::get('/match-requests/{matchRequest}', [MatchRequestController::class, 'show'])->name('match-requests.show');
+    Route::post('/match-requests/{matchRequest}/apply', [MatchRequestController::class, 'apply'])->name('match-requests.apply');
+    Route::delete('/match-requests/{matchRequest}/cancel', [MatchRequestController::class, 'cancel'])->name('match-requests.cancel');
+    Route::post('/match-requests/{matchRequest}/applications/{application}/accept', [MatchRequestController::class, 'acceptApplication'])->name('match-requests.applications.accept');
+    Route::delete('/match-requests/{matchRequest}/applications/{application}', [MatchRequestController::class, 'cancelApplication'])->name('match-requests.applications.cancel');
+    Route::get('/my-match-requests', [MatchRequestController::class, 'myRequests'])->name('match-requests.my-requests');
+    Route::get('/my-match-applications', [MatchRequestController::class, 'myApplications'])->name('match-requests.my-applications');
+
+    // Match result routes
+    Route::get('/matches/{match}/results', [MatchResultController::class, 'show'])->name('matches.results.show');
+    Route::post('/matches/{match}/results', [MatchResultController::class, 'store'])->name('matches.results.store');
+    Route::post('/matches/{match}/results/confirm', [MatchResultController::class, 'confirm'])->name('matches.results.confirm');
 });
