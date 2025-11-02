@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Http\Controllers;
 
 use App\Models\Team;
+use App\Models\TeamJoinRequest;
 use App\Models\User;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -25,20 +26,20 @@ class TeamController extends Controller
     public function index(Request $request): View
     {
         $user = Auth::user();
-        
+
         $ownedTeams = $user->ownedTeams()->active()->with('members')->get();
         $memberTeams = $user->teams()->active()->with('owner')->get();
-        
+
         // Build query for all teams with search and filters
         $query = Team::active()->with(['owner', 'members']);
-        
+
         // Search functionality
         if ($request->filled('search')) {
             $searchTerm = $request->get('search');
             $query->where('name', 'like', "%{$searchTerm}%")
-                  ->orWhere('description', 'like', "%{$searchTerm}%");
+                ->orWhere('description', 'like', "%{$searchTerm}%");
         }
-        
+
         // Filter by team availability
         if ($request->filled('availability')) {
             $availability = $request->get('availability');
@@ -48,7 +49,7 @@ class TeamController extends Controller
                 $query->whereRaw('(SELECT COUNT(*) FROM team_user WHERE team_user.team_id = teams.id) >= max_members');
             }
         }
-        
+
         // Filter by team size
         if ($request->filled('size')) {
             $size = $request->get('size');
@@ -60,7 +61,7 @@ class TeamController extends Controller
                 $query->where('max_members', '>', 15);
             }
         }
-        
+
         // Sort options
         $sortBy = $request->get('sort', 'recent');
         switch ($sortBy) {
@@ -77,7 +78,7 @@ class TeamController extends Controller
                 $query->orderBy('created_at', 'desc');
                 break;
         }
-        
+
         $allTeams = $query->paginate(12)->withQueryString();
 
         return view('teams.index', compact('ownedTeams', 'memberTeams', 'allTeams'));
@@ -99,13 +100,14 @@ class TeamController extends Controller
         $validated = $request->validate([
             'name' => 'required|string|max:255|unique:teams,name',
             'description' => 'nullable|string|max:1000',
-            'max_members' => 'required|integer|min:2|max:50',
+            'football_type' => 'required|in:football_5,football_7,football_11,futsal',
         ]);
 
         DB::transaction(function () use ($validated) {
             $team = Team::create([
                 ...$validated,
                 'owner_id' => Auth::id(),
+                'max_members' => Team::getMaxMembersForType($validated['football_type']),
             ]);
 
             // Add the owner as a member with 'owner' role
@@ -126,12 +128,28 @@ class TeamController extends Controller
     {
         $team->load(['owner', 'members']);
         $user = Auth::user();
-        
+
         $isOwner = $team->isOwnedBy($user);
         $isMember = $team->hasMember($user);
         $isCaptain = $team->isCaptain($user);
 
-        return view('teams.show', compact('team', 'isOwner', 'isMember', 'isCaptain'));
+        // Load pending join requests if user is owner or captain
+        $pendingRequests = collect();
+        if ($isOwner || $isCaptain) {
+            $pendingRequests = $team->joinRequests()
+                ->where('status', 'pending')
+                ->with('user')
+                ->orderBy('created_at', 'asc')
+                ->get();
+        }
+
+        // Check if current user has a pending request
+        $userPendingRequest = TeamJoinRequest::where('team_id', $team->id)
+            ->where('user_id', $user->id)
+            ->where('status', 'pending')
+            ->first();
+
+        return view('teams.show', compact('team', 'isOwner', 'isMember', 'isCaptain', 'pendingRequests', 'userPendingRequest'));
     }
 
     /**
@@ -140,7 +158,7 @@ class TeamController extends Controller
     public function edit(Team $team): View
     {
         $this->authorize('update', $team);
-        
+
         return view('teams.edit', compact('team'));
     }
 
@@ -154,10 +172,11 @@ class TeamController extends Controller
         $validated = $request->validate([
             'name' => 'required|string|max:255|unique:teams,name,' . $team->id,
             'description' => 'nullable|string|max:1000',
-            'max_members' => 'required|integer|min:2|max:50',
+            'football_type' => 'required|in:football_5,football_7,football_11,futsal',
             'is_active' => 'boolean',
         ]);
 
+        // max_members will be automatically updated by the model's boot method
         $team->update($validated);
 
         return redirect()->route('teams.show', $team)
@@ -178,9 +197,9 @@ class TeamController extends Controller
     }
 
     /**
-     * Join a team.
+     * Request to join a team.
      */
-    public function join(Team $team): RedirectResponse
+    public function join(Request $request, Team $team): RedirectResponse
     {
         $user = Auth::user();
 
@@ -194,13 +213,32 @@ class TeamController extends Controller
                 ->with('error', 'Este equipo está completo.');
         }
 
-        $team->members()->attach($user->id, [
-            'role' => 'member',
-            'joined_at' => now(),
+        // Check if user already has a pending request
+        $existingPendingRequest = TeamJoinRequest::where('team_id', $team->id)
+            ->where('user_id', $user->id)
+            ->where('status', 'pending')
+            ->first();
+
+        if ($existingPendingRequest) {
+            return redirect()->back()
+                ->with('error', 'Ya tienes una solicitud pendiente para este equipo.');
+        }
+
+        $validated = $request->validate([
+            'message' => 'nullable|string|max:500',
+        ]);
+
+        // Create new join request
+        // Note: Multiple accepted/rejected requests are now allowed for history tracking
+        TeamJoinRequest::create([
+            'team_id' => $team->id,
+            'user_id' => $user->id,
+            'status' => 'pending',
+            'message' => $validated['message'] ?? null,
         ]);
 
         return redirect()->back()
-            ->with('success', '¡Te has unido exitosamente al equipo!');
+            ->with('success', '¡Solicitud de unión enviada! El propietario del equipo la revisará pronto.');
     }
 
     /**
@@ -267,5 +305,96 @@ class TeamController extends Controller
 
         return redirect()->back()
             ->with('success', '¡Miembro removido del equipo exitosamente!');
+    }
+
+    /**
+     * Approve a join request.
+     */
+    public function approveJoinRequest(Team $team, TeamJoinRequest $joinRequest): RedirectResponse
+    {
+        $this->authorize('manage', $team);
+
+        if ($joinRequest->team_id !== $team->id) {
+            return redirect()->back()
+                ->with('error', 'Solicitud inválida.');
+        }
+
+        if (!$joinRequest->isPending()) {
+            return redirect()->back()
+                ->with('error', 'Esta solicitud ya fue procesada.');
+        }
+
+        if (!$team->hasSpaceForMembers()) {
+            return redirect()->back()
+                ->with('error', 'El equipo ya está completo.');
+        }
+
+        DB::transaction(function () use ($team, $joinRequest) {
+            // Add user to team
+            $team->members()->attach($joinRequest->user_id, [
+                'role' => 'member',
+                'joined_at' => now(),
+            ]);
+
+            // Update request status
+            $joinRequest->update([
+                'status' => 'accepted',
+                'responded_at' => now(),
+                'responded_by' => Auth::id(),
+            ]);
+        });
+
+        return redirect()->back()
+            ->with('success', '¡Solicitud aprobada! El usuario se ha unido al equipo.');
+    }
+
+    /**
+     * Reject a join request.
+     */
+    public function rejectJoinRequest(Team $team, TeamJoinRequest $joinRequest): RedirectResponse
+    {
+        $this->authorize('manage', $team);
+
+        if ($joinRequest->team_id !== $team->id) {
+            return redirect()->back()
+                ->with('error', 'Solicitud inválida.');
+        }
+
+        if (!$joinRequest->isPending()) {
+            return redirect()->back()
+                ->with('error', 'Esta solicitud ya fue procesada.');
+        }
+
+        $joinRequest->update([
+            'status' => 'rejected',
+            'responded_at' => now(),
+            'responded_by' => Auth::id(),
+        ]);
+
+        return redirect()->back()
+            ->with('success', 'Solicitud rechazada.');
+    }
+
+    /**
+     * Cancel a join request (by the requester).
+     */
+    public function cancelJoinRequest(Team $team, TeamJoinRequest $joinRequest): RedirectResponse
+    {
+        $user = Auth::user();
+
+        if ($joinRequest->user_id !== $user->id) {
+            return redirect()->back()
+                ->with('error', 'No puedes cancelar esta solicitud.');
+        }
+
+        if (!$joinRequest->isPending()) {
+            return redirect()->back()
+                ->with('error', 'Esta solicitud ya fue procesada.');
+        }
+
+        $joinRequest->delete();
+
+        return redirect()->back()
+            ->with('success', 'Solicitud cancelada.');
     }
 }

@@ -100,4 +100,20 @@ class User extends Authenticatable
     {
         return $this->captainTeams()->exists();
     }
+
+    /**
+     * Get the join requests sent by this user.
+     */
+    public function teamJoinRequests(): HasMany
+    {
+        return $this->hasMany(TeamJoinRequest::class);
+    }
+
+    /**
+     * Get the pending join requests sent by this user.
+     */
+    public function pendingTeamJoinRequests(): HasMany
+    {
+        return $this->hasMany(TeamJoinRequest::class)->where('status', 'pending');
+    }
 }

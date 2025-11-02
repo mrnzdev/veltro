@@ -185,6 +185,33 @@ php artisan db:seed
 php artisan make:migration create_table_name
 ```
 
+### Gestión de Caché
+
+Laravel cachea vistas, rutas, configuraciones y más para mejorar el rendimiento. Si ves contenido antiguo o cambios que no se reflejan, limpia las cachés:
+
+```bash
+# Método rápido: Usar el script automatizado (Windows)
+.\clear-cache.bat
+
+# Método manual: Limpiar todas las cachés con un solo comando
+php artisan optimize:clear
+
+# O limpiar cachés individuales
+php artisan cache:clear      # Caché de aplicación
+php artisan view:clear        # Vistas compiladas
+php artisan route:clear       # Caché de rutas
+php artisan config:clear      # Caché de configuración
+
+# Regenerar archivos autoload de Composer
+composer dump-autoload
+```
+
+**💡 Consejo:** Durante el desarrollo, si experimentas problemas con contenido antiguo o cambios que no aparecen:
+
+1. Ejecuta `.\clear-cache.bat` (Windows) o `php artisan optimize:clear`
+2. Refresca tu navegador con Ctrl+F5 (limpia caché del navegador)
+3. Si el problema persiste, ejecuta `composer dump-autoload`
+
 ## Gestión de Paquetes
 
 Este proyecto utiliza **bun** como gestor de paquetes de Node.js para mejor rendimiento y eficiencia de espacio en disco.
