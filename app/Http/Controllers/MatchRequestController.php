@@ -123,6 +123,11 @@ class MatchRequestController extends Controller
                 )
                 ->unique('id')
                 ->filter(function ($userTeam) use ($matchRequest) {
+                    // Only show teams with matching football type
+                    if ($userTeam->football_type !== $matchRequest->team->football_type) {
+                        return false;
+                    }
+                    
                     // Filter out teams that already applied
                     return !$matchRequest->applications()
                         ->where('applicant_team_id', $userTeam->id)
@@ -202,6 +207,15 @@ class MatchRequestController extends Controller
         if (!$matchRequest->canAcceptApplications()) {
             return redirect()->back()
                 ->with('error', 'Esta solicitud de partido ya no acepta aplicaciones.');
+        }
+
+        // Verify football types match before accepting
+        $requestingTeam = $matchRequest->team;
+        $applicantTeam = $application->applicantTeam;
+        
+        if ($requestingTeam->football_type !== $applicantTeam->football_type) {
+            return redirect()->back()
+                ->with('error', 'No se puede aceptar esta aplicación. Los equipos deben jugar el mismo tipo de fútbol (' . $requestingTeam->getFootballTypeName() . ' vs ' . $applicantTeam->getFootballTypeName() . ').');
         }
 
         DB::transaction(function () use ($matchRequest, $application) {

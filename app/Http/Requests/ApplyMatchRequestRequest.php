@@ -52,6 +52,14 @@ class ApplyMatchRequestRequest extends FormRequest
                     if ($existingApplication) {
                         $fail('Este equipo ya ha aplicado a esta solicitud de partido.');
                     }
+
+                    // Check if football types match
+                    $matchRequest = $this->route('matchRequest');
+                    if ($matchRequest->team->football_type !== $team->football_type) {
+                        $requestTeamType = $matchRequest->team->getFootballTypeName();
+                        $applicantTeamType = $team->getFootballTypeName();
+                        $fail("Los tipos de fútbol no coinciden. El equipo solicitante juega {$requestTeamType}, pero tu equipo juega {$applicantTeamType}.");
+                    }
                 },
             ],
             'message' => 'nullable|string|max:500',

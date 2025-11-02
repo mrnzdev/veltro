@@ -3,7 +3,7 @@
 @section('title', config('app.name', 'Laravel') . ' - Solicitud de Partido')
 
 @section('content')
-<div class="max-w-5xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
+<div class="max-w-7xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
     <div class="mb-6">
         <a href="{{ route('match-requests.index') }}" class="inline-flex items-center text-[#01FF87] hover:text-[#00e676] transition-colors duration-200">
             <svg class="h-5 w-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -76,27 +76,27 @@
                     <div class="bg-[#01FF87]/10 border border-[#01FF87]/30 rounded-lg p-4 mb-4">
                         <p class="text-[#01FF87] font-semibold mb-2">¡Partido Confirmado!</p>
                         <p class="text-gray-300 mb-3">El partido se jugará contra <span class="font-bold text-[#CDFDE6]">{{ $matchRequest->match->opponentTeam->name }}</span></p>
-                        
+
                         @if($matchRequest->match->status === 'scheduled')
-                            @if($matchRequest->match->canRecordResults(Auth::user()))
-                                <!-- Show result recording link -->
-                                @if(!$matchRequest->match->areResultsConfirmed())
-                                    <a href="{{ route('matches.results.show', $matchRequest->match) }}" class="inline-flex items-center px-4 py-2 bg-gradient-to-r from-[#01FF87] to-[#00e676] text-[#1f1f1f] font-bold rounded-lg hover:shadow-lg hover:shadow-[#01FF87]/20 transition-all duration-200">
-                                        <svg class="h-5 w-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
-                                        </svg>
-                                        Registrar Resultados
-                                    </a>
-                                @endif
-                            @endif
+                        @if($matchRequest->match->canRecordResults(Auth::user()))
+                        <!-- Show result recording link -->
+                        @if(!$matchRequest->match->areResultsConfirmed())
+                        <a href="{{ route('matches.results.show', $matchRequest->match) }}" class="inline-flex items-center px-4 py-2 bg-gradient-to-r from-[#01FF87] to-[#00e676] text-[#1f1f1f] font-bold rounded-lg hover:shadow-lg hover:shadow-[#01FF87]/20 transition-all duration-200">
+                            <svg class="h-5 w-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                            </svg>
+                            Registrar Resultados
+                        </a>
+                        @endif
+                        @endif
                         @elseif($matchRequest->match->status === 'completed')
-                            <!-- Match completed, show results link -->
-                            <a href="{{ route('matches.results.show', $matchRequest->match) }}" class="inline-flex items-center px-4 py-2 bg-[#3a3a3a] text-[#CDFDE6] font-medium rounded-lg hover:bg-[#4a4a4a] border border-[#4a4a4a] transition-all duration-200">
-                                <svg class="h-5 w-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path>
-                                </svg>
-                                Ver Resultados ({{ $matchRequest->match->team_score }} - {{ $matchRequest->match->opponent_score }})
-                            </a>
+                        <!-- Match completed, show results link -->
+                        <a href="{{ route('matches.results.show', $matchRequest->match) }}" class="inline-flex items-center px-4 py-2 bg-[#3a3a3a] text-[#CDFDE6] font-medium rounded-lg hover:bg-[#4a4a4a] border border-[#4a4a4a] transition-all duration-200">
+                            <svg class="h-5 w-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path>
+                            </svg>
+                            Ver Resultados ({{ $matchRequest->match->team_score }} - {{ $matchRequest->match->opponent_score }})
+                        </a>
                         @endif
                     </div>
                 </div>
@@ -162,6 +162,13 @@
                         <p class="text-[#CDFDE6] font-semibold">{{ $matchRequest->team->name }}</p>
                     </div>
                     <div>
+                        <p class="text-xs text-gray-400 mb-1">Tipo de Fútbol</p>
+                        <p class="text-[#01FF87] font-semibold flex items-center gap-2">
+                            <span class="text-xl">{{ $matchRequest->team->getFootballTypeIcon() }}</span>
+                            {{ $matchRequest->team->getFootballTypeName() }}
+                        </p>
+                    </div>
+                    <div>
                         <p class="text-xs text-gray-400 mb-1">Miembros</p>
                         <p class="text-[#CDFDE6] font-semibold">{{ $matchRequest->team->getCurrentMembersCount() }}/{{ $matchRequest->team->max_members }}</p>
                     </div>
@@ -176,7 +183,8 @@
             </div>
 
             <!-- Apply Section (Non-Owner View) -->
-            @if(!$isOwnerOrCaptain && $matchRequest->canAcceptApplications() && $userTeamsCanApply->count() > 0)
+            @if(!$isOwnerOrCaptain && $matchRequest->canAcceptApplications())
+            @if($userTeamsCanApply->count() > 0)
             <div class="bg-gradient-to-br from-[#2a2a2a] to-[#252525] rounded-xl p-6 border border-[#3a3a3a] shadow-xl">
                 <h3 class="text-lg font-bold text-[#CDFDE6] mb-4">Aplicar con tu Equipo</h3>
                 <form method="POST" action="{{ route('match-requests.apply', $matchRequest) }}">
@@ -186,7 +194,7 @@
                             <label for="team_id" class="block text-sm font-medium text-[#CDFDE6] mb-2">Selecciona tu equipo</label>
                             <select id="team_id" name="team_id" required class="w-full px-3 py-2 bg-[#3a3a3a] border border-[#4a4a4a] rounded-lg text-[#CDFDE6] focus:outline-none focus:ring-2 focus:ring-[#01FF87]">
                                 @foreach($userTeamsCanApply as $team)
-                                <option value="{{ $team->id }}">{{ $team->name }}</option>
+                                <option value="{{ $team->id }}">{{ $team->name }} ({{ $team->getFootballTypeName() }})</option>
                                 @endforeach
                             </select>
                         </div>
@@ -200,9 +208,22 @@
                     </div>
                 </form>
             </div>
+            @else
+            <div class="bg-gradient-to-br from-[#2a2a2a] to-[#252525] rounded-xl p-6 border border-[#3a3a3a] shadow-xl">
+                <h3 class="text-lg font-bold text-[#CDFDE6] mb-4">No puedes aplicar</h3>
+                <div class="flex items-start gap-3 p-4 bg-yellow-500/10 border border-yellow-500/30 rounded-lg">
+                    <svg class="h-5 w-5 text-yellow-400 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
+                    </svg>
+                    <div class="text-sm">
+                        <p class="text-yellow-300 font-medium mb-1">Tipo de fútbol incompatible</p>
+                        <p class="text-gray-400">Esta solicitud es para equipos de <strong class="text-[#01FF87]">{{ $matchRequest->team->getFootballTypeName() }}</strong>. Tus equipos juegan otros tipos de fútbol.</p>
+                    </div>
+                </div>
+            </div>
+            @endif
             @endif
         </div>
     </div>
 </div>
 @endsection
-

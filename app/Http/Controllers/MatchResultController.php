@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\DisputeMatchResultRequest;
 use App\Http\Requests\StoreMatchResultRequest;
 use App\Models\MatchGoal;
 use App\Models\MatchParticipant;
@@ -26,8 +27,8 @@ class MatchResultController extends Controller
      */
     public function show(TeamMatch $match): View
     {
-        if (!$match->canRecordResults(Auth::user())) {
-            abort(403, 'No tienes permiso para registrar resultados de este partido.');
+        if (!$match->canViewResults(Auth::user())) {
+            abort(403, 'No tienes permiso para ver los resultados de este partido.');
         }
 
         $match->load(['team.members', 'opponentTeam.members', 'participants.user', 'goals.scorer']);
@@ -49,12 +50,13 @@ class MatchResultController extends Controller
             return view('matches.results.show', compact('match', 'userTeam', 'opponentTeam', 'userTeamSide'));
         }
 
-        // If user's team already submitted but opponent hasn't
-        if ($hasUserTeamSubmitted && !$match->areResultsConfirmed()) {
-            return view('matches.results.pending', compact('match', 'userTeam', 'opponentTeam', 'userTeamSide', 'hasOpponentSubmitted'));
+        // If ANYONE has submitted (either team), show the pending/review page
+        // This prevents the second team from trying to record again (which causes duplicate errors)
+        if ($hasUserTeamSubmitted || $hasOpponentSubmitted) {
+            return view('matches.results.pending', compact('match', 'userTeam', 'opponentTeam', 'userTeamSide', 'hasOpponentSubmitted', 'hasUserTeamSubmitted'));
         }
 
-        // Show the recording form
+        // Only show recording form if NO ONE has submitted yet
         return view('matches.results.record', compact('match', 'userTeam', 'opponentTeam', 'userTeamSide'));
     }
 
@@ -67,9 +69,10 @@ class MatchResultController extends Controller
         $user = Auth::user();
         $userTeamSide = $match->getUserTeamSide($user);
         $userTeamId = $userTeamSide === 'team' ? $match->team_id : $match->opponent_team_id;
+        $opponentTeamId = $userTeamSide === 'team' ? $match->opponent_team_id : $match->team_id;
 
-        DB::transaction(function () use ($match, $validated, $user, $userTeamSide, $userTeamId) {
-            // Store participants
+        DB::transaction(function () use ($match, $validated, $user, $userTeamSide, $userTeamId, $opponentTeamId) {
+            // Store user team participants
             $participants = $validated['participants'] ?? [];
             foreach ($participants as $userId) {
                 MatchParticipant::create([
@@ -79,21 +82,42 @@ class MatchResultController extends Controller
                 ]);
             }
 
-            // Store goals
+            // Store opponent team participants
+            $opponentParticipants = $validated['opponent_participants'] ?? [];
+            foreach ($opponentParticipants as $userId) {
+                MatchParticipant::create([
+                    'match_id' => $match->id,
+                    'team_id' => $opponentTeamId,
+                    'user_id' => $userId,
+                ]);
+            }
+
+            // Store user team goals
             $goals = $validated['goals'] ?? [];
             foreach ($goals as $goal) {
                 MatchGoal::create([
                     'match_id' => $match->id,
                     'team_id' => $userTeamId,
-                    'scorer_id' => $goal['scorer_id'],
-                    'minute' => $goal['minute'],
+                    'scorer_id' => $goal['scorer_id'] ?? null,
+                    'minute' => $goal['minute'] ?? null,
                 ]);
             }
 
-            // Calculate scores
+            // Store opponent team goals
+            $opponentGoals = $validated['opponent_goals'] ?? [];
+            foreach ($opponentGoals as $goal) {
+                MatchGoal::create([
+                    'match_id' => $match->id,
+                    'team_id' => $opponentTeamId,
+                    'scorer_id' => $goal['scorer_id'] ?? null,
+                    'minute' => $goal['minute'] ?? null,
+                ]);
+            }
+
+            // Calculate scores from all goals
             $scores = $match->calculateScores();
 
-            // Update match with submission info
+            // Update match with submission info and scores
             if ($userTeamSide === 'team') {
                 $match->update([
                     'team_result_submitted_at' => now(),
@@ -109,40 +133,7 @@ class MatchResultController extends Controller
                     'opponent_score' => $scores['opponent_score'],
                 ]);
             }
-
-            // Check if both teams have submitted
-            if ($match->hasTeamSubmittedResults() && $match->hasOpponentSubmittedResults()) {
-                // Both teams submitted - check if results match
-                $teamParticipants = $match->participants()->where('team_id', $match->team_id)->pluck('user_id')->sort()->values()->toArray();
-                $opponentParticipants = $match->participants()->where('team_id', $match->opponent_team_id)->pluck('user_id')->sort()->values()->toArray();
-
-                $teamGoals = $match->goals()->where('team_id', $match->team_id)->get()->map(function ($goal) {
-                    return ['scorer_id' => $goal->scorer_id, 'minute' => $goal->minute];
-                })->sortBy('minute')->values()->toArray();
-
-                $opponentGoals = $match->goals()->where('team_id', $match->opponent_team_id)->get()->map(function ($goal) {
-                    return ['scorer_id' => $goal->scorer_id, 'minute' => $goal->minute];
-                })->sortBy('minute')->values()->toArray();
-
-                // Simple comparison - if same data, auto-confirm
-                $resultsMatch = ($teamParticipants == $opponentParticipants) && 
-                               ($teamGoals == $opponentGoals) &&
-                               ($match->team_score == $scores['team_score']) &&
-                               ($match->opponent_score == $scores['opponent_score']);
-
-                if ($resultsMatch) {
-                    $match->update([
-                        'result_confirmed_at' => now(),
-                        'status' => 'completed',
-                    ]);
-                }
-            }
         });
-
-        if ($match->areResultsConfirmed()) {
-            return redirect()->route('matches.results.show', $match)
-                ->with('success', '¡Resultados registrados y confirmados automáticamente!');
-        }
 
         return redirect()->route('matches.results.show', $match)
             ->with('success', '¡Resultados registrados! Esperando confirmación del equipo contrario.');
@@ -201,5 +192,82 @@ class MatchResultController extends Controller
 
         return redirect()->route('matches.results.show', $match)
             ->with('success', '¡Resultados confirmados! El partido ha sido completado.');
+    }
+
+    /**
+     * Dispute results submitted by the other team.
+     */
+    public function dispute(DisputeMatchResultRequest $request, TeamMatch $match): RedirectResponse
+    {
+        $validated = $request->validated();
+        $userTeamSide = $match->getUserTeamSide(Auth::user());
+
+        DB::transaction(function () use ($match, $validated, $userTeamSide) {
+            // Clear all participants and goals to allow re-submission
+            $match->participants()->delete();
+            $match->goals()->delete();
+
+            // Clear submission timestamps to reset the flow
+            $match->update([
+                'team_result_submitted_at' => null,
+                'team_result_submitted_by' => null,
+                'opponent_result_submitted_at' => null,
+                'opponent_result_submitted_by' => null,
+                'team_score' => null,
+                'opponent_score' => null,
+            ]);
+
+            // TODO: Optionally log the dispute reason for admin review
+            // You could add a match_disputes table or notification system here
+        });
+
+        return redirect()->route('matches.results.show', $match)
+            ->with('warning', 'Resultados disputados. El equipo contrario deberá volver a registrar los resultados.');
+    }
+
+    /**
+     * Allow the submitting team to edit their submission before confirmation.
+     */
+    public function edit(TeamMatch $match): RedirectResponse
+    {
+        if (!$match->canRecordResults(Auth::user())) {
+            return redirect()->back()
+                ->with('error', 'No tienes permiso para editar estos resultados.');
+        }
+
+        if ($match->areResultsConfirmed()) {
+            return redirect()->back()
+                ->with('error', 'Los resultados ya han sido confirmados y no pueden editarse.');
+        }
+
+        $userTeamSide = $match->getUserTeamSide(Auth::user());
+
+        // Check if user's team has submitted (can only edit your own submission)
+        $hasUserTeamSubmitted = ($userTeamSide === 'team' && $match->hasTeamSubmittedResults()) ||
+                                ($userTeamSide === 'opponent' && $match->hasOpponentSubmittedResults());
+
+        if (!$hasUserTeamSubmitted) {
+            return redirect()->back()
+                ->with('error', 'Tu equipo no ha registrado resultados aún.');
+        }
+
+        DB::transaction(function () use ($match, $userTeamSide) {
+            // Clear all participants and goals to allow re-submission
+            $match->participants()->delete();
+            $match->goals()->delete();
+
+            // Clear submission timestamps
+            $match->update([
+                'team_result_submitted_at' => null,
+                'team_result_submitted_by' => null,
+                'opponent_result_submitted_at' => null,
+                'opponent_result_submitted_by' => null,
+                'team_score' => null,
+                'opponent_score' => null,
+            ]);
+        });
+
+        return redirect()->route('matches.results.show', $match)
+            ->with('success', 'Los resultados han sido eliminados. Puedes registrarlos nuevamente.');
     }
 }

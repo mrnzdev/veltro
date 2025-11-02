@@ -55,10 +55,42 @@ class MatchGoal extends Model
     }
 
     /**
+     * Check if the goal has a known scorer.
+     */
+    public function hasScorer(): bool
+    {
+        return $this->scorer_id !== null;
+    }
+
+    /**
+     * Check if the goal has a recorded minute.
+     */
+    public function hasMinute(): bool
+    {
+        return $this->minute !== null;
+    }
+
+    /**
+     * Get the scorer's name or "Desconocido" if unknown.
+     */
+    public function getScorerName(): string
+    {
+        if ($this->hasScorer() && $this->scorer) {
+            return $this->scorer->name;
+        }
+
+        return 'Desconocido';
+    }
+
+    /**
      * Format the minute for display.
      */
     public function formatMinute(): string
     {
+        if (!$this->hasMinute()) {
+            return '--';
+        }
+
         return "{$this->minute}'";
     }
 }

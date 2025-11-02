@@ -174,6 +174,21 @@ class TeamMatch extends Model
     }
 
     /**
+     * Check if a user can view results for this match.
+     * More permissive than canRecordResults - allows viewing completed matches.
+     */
+    public function canViewResults(User $user): bool
+    {
+        $requestingTeam = $this->team;
+        $opponentTeam = $this->opponentTeam;
+
+        $isRequestingTeamMember = $requestingTeam->isOwnedBy($user) || $requestingTeam->isCaptain($user);
+        $isOpponentTeamMember = $opponentTeam->isOwnedBy($user) || $opponentTeam->isCaptain($user);
+
+        return $isRequestingTeamMember || $isOpponentTeamMember;
+    }
+
+    /**
      * Check if a user can record results for this match.
      */
     public function canRecordResults(User $user): bool
@@ -186,13 +201,7 @@ class TeamMatch extends Model
             return false;
         }
 
-        $requestingTeam = $this->team;
-        $opponentTeam = $this->opponentTeam;
-
-        $isRequestingTeamMember = $requestingTeam->isOwnedBy($user) || $requestingTeam->isCaptain($user);
-        $isOpponentTeamMember = $opponentTeam->isOwnedBy($user) || $opponentTeam->isCaptain($user);
-
-        return $isRequestingTeamMember || $isOpponentTeamMember;
+        return $this->canViewResults($user);
     }
 
     /**

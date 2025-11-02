@@ -61,4 +61,6 @@ Route::middleware('auth')->group(function () {
     Route::get('/matches/{match}/results', [MatchResultController::class, 'show'])->name('matches.results.show');
     Route::post('/matches/{match}/results', [MatchResultController::class, 'store'])->name('matches.results.store');
     Route::post('/matches/{match}/results/confirm', [MatchResultController::class, 'confirm'])->name('matches.results.confirm');
+    Route::post('/matches/{match}/results/dispute', [MatchResultController::class, 'dispute'])->name('matches.results.dispute');
+    Route::post('/matches/{match}/results/edit', [MatchResultController::class, 'edit'])->name('matches.results.edit');
 });

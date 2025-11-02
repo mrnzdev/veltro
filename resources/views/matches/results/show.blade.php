@@ -3,7 +3,7 @@
 @section('title', config('app.name', 'Laravel') . ' - Resultados del Partido')
 
 @section('content')
-<div class="max-w-5xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
+<div class="max-w-7xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
     <div class="mb-6">
         <a href="{{ route('match-requests.show', $match->matchRequest) }}" class="inline-flex items-center text-[#01FF87] hover:text-[#00e676] transition-colors duration-200">
             <svg class="h-5 w-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -117,13 +117,18 @@
     <div class="bg-gradient-to-br from-[#2a2a2a] to-[#252525] rounded-xl p-6 border border-[#3a3a3a]">
         <h3 class="text-xl font-bold text-[#CDFDE6] mb-4">Cronología de Goles</h3>
         <div class="space-y-3">
-            @foreach($match->goals()->with(['scorer', 'team'])->orderBy('minute')->get() as $goal)
+            @php
+            $goalsWithMinutes = $match->goals()->with(['scorer', 'team'])->whereNotNull('minute')->orderBy('minute')->get();
+            $goalsWithoutMinutes = $match->goals()->with(['scorer', 'team'])->whereNull('minute')->get();
+            $allGoals = $goalsWithMinutes->concat($goalsWithoutMinutes);
+            @endphp
+            @foreach($allGoals as $goal)
             <div class="flex items-center gap-4 p-4 bg-[#3a3a3a] rounded-lg hover:bg-[#4a4a4a] transition-colors">
                 <div class="flex-shrink-0 w-16 text-center">
-                    <span class="text-2xl font-bold text-[#01FF87]">{{ $goal->minute }}'</span>
+                    <span class="text-2xl font-bold text-[#01FF87]">{{ $goal->formatMinute() }}</span>
                 </div>
                 <div class="flex-1">
-                    <p class="text-[#CDFDE6] font-semibold">{{ $goal->scorer->name }}</p>
+                    <p class="text-[#CDFDE6] font-semibold">{{ $goal->getScorerName() }}</p>
                     <p class="text-sm text-gray-400">{{ $goal->team->name }}</p>
                 </div>
                 <div class="flex-shrink-0">
@@ -140,4 +145,3 @@
     @endif
 </div>
 @endsection
-
