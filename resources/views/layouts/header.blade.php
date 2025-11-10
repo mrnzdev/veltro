@@ -230,9 +230,14 @@
                 <!-- User Profile -->
                 <div class="flex items-center space-x-3">
                     <a href="{{ route('profile.show') }}" class="flex items-center space-x-3 group">
-                        <div class="h-9 w-9 bg-gradient-to-br from-[#01FF87] to-[#00e676] rounded-full flex items-center justify-center group-hover:scale-105 transition-transform duration-300 shadow-lg shadow-[#01FF87]/20">
-                            <span class="text-sm font-semibold text-[#1f1f1f]">{{ substr(Auth::user()->name, 0, 1) }}</span>
-                        </div>
+                        @if(Auth::user()->avatar)
+                            <img src="{{ Auth::user()->avatar }}" alt="{{ Auth::user()->name }}" 
+                                class="h-9 w-9 rounded-full object-cover border-2 border-[#01FF87] group-hover:scale-105 transition-transform duration-300 shadow-lg shadow-[#01FF87]/20">
+                        @else
+                            <div class="h-9 w-9 bg-gradient-to-br from-[#01FF87] to-[#00e676] rounded-full flex items-center justify-center group-hover:scale-105 transition-transform duration-300 shadow-lg shadow-[#01FF87]/20">
+                                <span class="text-sm font-semibold text-[#1f1f1f]">{{ substr(Auth::user()->name, 0, 1) }}</span>
+                            </div>
+                        @endif
                         <div class="hidden lg:block">
                             <p class="text-sm font-medium text-[#CDFDE6] group-hover:text-[#01FF87] transition-colors duration-200">{{ Auth::user()->name }}</p>
                             <p class="text-xs text-gray-400 group-hover:text-[#01FF87]/70 transition-colors duration-200">{{ Auth::user()->email }}</p>

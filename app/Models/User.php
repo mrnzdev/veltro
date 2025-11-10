@@ -25,6 +25,8 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
+        'google_id',
+        'avatar',
     ];
 
     /**
@@ -115,5 +117,21 @@ class User extends Authenticatable
     public function pendingTeamJoinRequests(): HasMany
     {
         return $this->hasMany(TeamJoinRequest::class)->where('status', 'pending');
+    }
+
+    /**
+     * Check if the user is an OAuth-only user (no password set).
+     */
+    public function isOAuthOnly(): bool
+    {
+        return !empty($this->google_id) && empty($this->password);
+    }
+
+    /**
+     * Check if the user has linked Google account.
+     */
+    public function hasGoogleLinked(): bool
+    {
+        return !empty($this->google_id);
     }
 }

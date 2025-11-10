@@ -21,6 +21,34 @@
             <p class="text-sm text-gray-500">{{ $match->match_datetime->format('d/m/Y H:i') }} - {{ $match->location }}</p>
         </div>
 
+        <!-- Dispute History -->
+        @if($match->disputes()->count() > 0)
+        <div class="bg-orange-500/10 border border-orange-500/30 rounded-lg p-6 mb-8">
+            <div class="flex items-center gap-3 mb-4">
+                <svg class="h-6 w-6 text-orange-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
+                </svg>
+                <h3 class="text-lg font-bold text-orange-400">Historial de Disputas</h3>
+            </div>
+            <div class="space-y-3">
+                @foreach($match->disputes()->with('disputedBy')->latest()->get() as $dispute)
+                <div class="bg-[#2a2a2a]/50 rounded-lg p-4 border-l-4 border-orange-500/50">
+                    <div class="flex items-start justify-between mb-2">
+                        <p class="text-sm text-gray-300">
+                            <span class="font-semibold text-orange-300">{{ $dispute->disputedBy->name }}</span>
+                            <span class="text-gray-400">disputó los resultados</span>
+                        </p>
+                        <span class="text-xs text-gray-500">{{ $dispute->created_at->diffForHumans() }}</span>
+                    </div>
+                    <p class="text-sm text-gray-400 italic bg-[#1a1a1a] p-3 rounded border-l-2 border-orange-500/30">
+                        "{{ $dispute->dispute_reason }}"
+                    </p>
+                </div>
+                @endforeach
+            </div>
+        </div>
+        @endif
+
         @if($hasOpponentSubmitted)
         <!-- Opponent has submitted, user can confirm -->
         <div class="bg-yellow-500/10 border border-yellow-500/30 rounded-lg p-6 mb-8">

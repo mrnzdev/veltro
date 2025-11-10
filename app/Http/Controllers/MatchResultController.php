@@ -6,6 +6,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\DisputeMatchResultRequest;
 use App\Http\Requests\StoreMatchResultRequest;
+use App\Models\MatchDispute;
 use App\Models\MatchGoal;
 use App\Models\MatchParticipant;
 use App\Models\TeamMatch;
@@ -203,6 +204,14 @@ class MatchResultController extends Controller
         $userTeamSide = $match->getUserTeamSide(Auth::user());
 
         DB::transaction(function () use ($match, $validated, $userTeamSide) {
+            // Log the dispute for audit trail
+            MatchDispute::create([
+                'match_id' => $match->id,
+                'disputed_by' => Auth::id(),
+                'dispute_reason' => $validated['reason'],
+                'team_side' => $userTeamSide,
+            ]);
+
             // Clear all participants and goals to allow re-submission
             $match->participants()->delete();
             $match->goals()->delete();
@@ -216,13 +225,10 @@ class MatchResultController extends Controller
                 'team_score' => null,
                 'opponent_score' => null,
             ]);
-
-            // TODO: Optionally log the dispute reason for admin review
-            // You could add a match_disputes table or notification system here
         });
 
         return redirect()->route('matches.results.show', $match)
-            ->with('warning', 'Resultados disputados. El equipo contrario deberá volver a registrar los resultados.');
+            ->with('success', 'Resultados disputados exitosamente. El equipo contrario deberá volver a registrar los resultados.');
     }
 
     /**

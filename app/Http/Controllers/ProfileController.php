@@ -44,17 +44,27 @@ class ProfileController extends Controller
 
     public function updatePassword(Request $request)
     {
-        $request->validate([
-            'current_password' => ['required', 'current_password'],
-            'password' => ['required', 'confirmed', Password::defaults()],
-        ]);
-
         $user = Auth::user();
+
+        // If user has a password, they must provide the current one
+        // If user is OAuth-only (no password), they can set one without providing current
+        $rules = [
+            'password' => ['required', 'confirmed', Password::defaults()],
+        ];
+
+        if ($user->password) {
+            $rules['current_password'] = ['required', 'current_password'];
+        }
+
+        $request->validate($rules);
+
         $user->update([
             'password' => Hash::make($request->password),
         ]);
 
-        return redirect()->route('profile.show')->with('success', '¡Contraseña actualizada exitosamente!');
+        $message = $user->password ? '¡Contraseña actualizada exitosamente!' : '¡Contraseña establecida exitosamente!';
+        
+        return redirect()->route('profile.show')->with('success', $message);
     }
 
     public function deleteAccount(Request $request)

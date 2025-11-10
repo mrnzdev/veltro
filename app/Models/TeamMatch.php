@@ -158,6 +158,14 @@ class TeamMatch extends Model
     }
 
     /**
+     * Get the disputes for this match.
+     */
+    public function disputes(): HasMany
+    {
+        return $this->hasMany(MatchDispute::class, 'match_id');
+    }
+
+    /**
      * Get the user who submitted results for the requesting team.
      */
     public function teamResultSubmitter(): BelongsTo

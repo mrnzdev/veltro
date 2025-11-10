@@ -87,4 +87,89 @@ class AuthService
             'user' => $user
         ];
     }
+
+    /**
+     * Find or create OAuth user
+     */
+    public function findOrCreateOAuthUser(string $googleId, string $email, string $name, ?string $avatar): array
+    {
+        try {
+            DB::beginTransaction();
+
+            // Check if user exists by google_id
+            $userByGoogleId = DB::table('users')->where('google_id', $googleId)->first();
+
+            if ($userByGoogleId) {
+                // Update avatar if provided
+                if ($avatar) {
+                    DB::table('users')
+                        ->where('id', $userByGoogleId->id)
+                        ->update(['avatar' => $avatar, 'updated_at' => now()]);
+                }
+
+                DB::commit();
+
+                return [
+                    'success' => true,
+                    'user_id' => $userByGoogleId->id,
+                    'is_new' => false,
+                    'linked' => false,
+                ];
+            }
+
+            // Check if user exists by email
+            $userByEmail = DB::table('users')->where('email', $email)->first();
+
+            if ($userByEmail) {
+                // Link Google account to existing user
+                DB::table('users')
+                    ->where('id', $userByEmail->id)
+                    ->update([
+                        'google_id' => $googleId,
+                        'avatar' => $avatar ?? $userByEmail->avatar,
+                        'updated_at' => now(),
+                    ]);
+
+                DB::commit();
+
+                return [
+                    'success' => true,
+                    'user_id' => $userByEmail->id,
+                    'is_new' => false,
+                    'linked' => true,
+                ];
+            }
+
+            // Create new user with Google OAuth
+            $userId = DB::table('users')->insertGetId([
+                'name' => $name,
+                'email' => $email,
+                'google_id' => $googleId,
+                'avatar' => $avatar,
+                'password' => null,
+                'email_verified_at' => now(), // Google accounts are pre-verified
+                'created_at' => now(),
+                'updated_at' => now(),
+            ]);
+
+            DB::commit();
+
+            return [
+                'success' => true,
+                'user_id' => $userId,
+                'is_new' => true,
+                'linked' => false,
+            ];
+        } catch (\Exception $e) {
+            DB::rollBack();
+
+            return [
+                'success' => false,
+                'message' => $e->getMessage(),
+                'user_id' => null,
+                'is_new' => false,
+                'linked' => false,
+            ];
+        }
+    }
 }

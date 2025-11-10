@@ -5,6 +5,7 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\MatchRequestController;
 use App\Http\Controllers\MatchResultController;
+use App\Http\Controllers\OAuthController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\TeamController;
 
@@ -12,6 +13,10 @@ use App\Http\Controllers\TeamController;
 Route::get('/', function () {
     return view('landing');
 })->name('home');
+
+// OAuth routes (accessible to both guest and authenticated users)
+Route::get('/auth/google', [OAuthController::class, 'redirectToGoogle'])->name('auth.google');
+Route::get('/auth/google/callback', [OAuthController::class, 'handleGoogleCallback'])->name('auth.google.callback');
 
 // Authentication routes
 Route::middleware('guest')->group(function () {
