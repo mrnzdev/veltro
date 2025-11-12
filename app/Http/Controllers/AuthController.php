@@ -101,8 +101,8 @@ class AuthController extends Controller
         if ($result['success']) {
             // Get the user model and log them in
             $user = User::find($result['user']['id']);
-            Auth::login($user);
-            
+            Auth::login($user, $request->boolean('remember'));
+
             $request->session()->regenerate();
 
             // Log successful login
@@ -131,7 +131,7 @@ class AuthController extends Controller
     public function logout(Request $request)
     {
         $user = Auth::user();
-        
+
         // Log logout event
         if ($user) {
             $this->logger->logAuthEvent('user_logout', [

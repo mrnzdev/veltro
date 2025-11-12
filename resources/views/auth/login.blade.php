@@ -109,6 +109,16 @@
                         @enderror
                     </div>
 
+                    <!-- Remember Me -->
+                    <div class="flex items-center">
+                        <input id="remember" name="remember" type="checkbox"
+                            class="h-4 w-4 rounded border-[#3a3a3a] bg-[#2a2a2a] text-[#01FF87] focus:ring-2 focus:ring-[#01FF87] focus:ring-offset-2 focus:ring-offset-[#2a2a2a] transition-all duration-200 cursor-pointer accent-[#01FF87]"
+                            {{ old('remember') ? 'checked' : '' }}>
+                        <label for="remember" class="ml-2 block text-sm text-[#CDFDE6] cursor-pointer">
+                            Recordarme
+                        </label>
+                    </div>
+
                     <!-- Submit Button -->
                     <div>
                         <button type="submit"
