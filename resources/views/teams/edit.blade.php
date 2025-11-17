@@ -135,7 +135,7 @@
                 <div class="text-sm text-gray-400">Máximo de Miembros</div>
             </div>
             <div class="text-center">
-                <div class="text-2xl font-bold text-[#01FF87]">{{ $team->created_at->diffInDays(now()) }}</div>
+                <div class="text-2xl font-bold text-[#01FF87]">{{ floor($team->created_at->diffInDays(now())) }}</div>
                 <div class="text-sm text-gray-400">Días Activo</div>
             </div>
         </div>
